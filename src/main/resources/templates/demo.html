@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Java2 Project Demo</title>
+    <!--  Import echarts lib by CDN, you can also import from local files  -->
+    <script src='https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js'></script>
+    <!--  Import the data files, the path is relative to the static folder  -->
+    <script src='../barchart.js'></script>
+    <script src='../piechart.js'></script>
+</head>
+<body style="text-align: center">
+<h1>This is just a demo page</h1>
+<div style="width: 100%;height: 60vh;display: flex">
+    <div style="width: 50%;height: 100%">
+        <div id="barchart" style="height: 100%;width: 100%"></div>
+    </div>
+    <div style="width: 50%;height: 100%">
+        <div id="piechart" style="height: 100%;width: 100%"></div>
+    </div>
+</div>
+</body>
+
+<script>
+    <!--  echarts configuration  -->
+    let barchart = echarts.init(document.getElementById('barchart'));
+    let barData = [];
+    let colors = ['#FF7F27', '#FFC90E', '#28D15A', '#0BBDFC', '#8365FA'];
+    let top5 = Object.entries(tagCountMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    for (const [key, value] of top5) {
+        barData.push({
+            name: key,
+            value: value / Object.keys(tagCountMap).length,
+            color: colors[barData.length % colors.length]
+        })
+    }
+
+    let barchartOption = {
+        dataset: [
+            {
+                dimensions: ['name', 'value'],
+                source: barData
+            },
+            {
+                transform: {
+                    type: 'sort',
+                    config: { dimension: 'value', order: 'desc' }
+                }
+            }
+        ],
+        title: {
+            text: 'Top 5 tags\' frequency in Java thread',
+            textStyle: {
+                fontStyle: 'oblique',
+                fontSize: 20,
+                color: '#000000'
+            },
+            left: 'center'
+        },
+        xAxis: {
+            type: 'category',
+            axisLabel: { interval: 0, rotate: 30 }
+        },
+        yAxis: {},
+        series: {
+            type: 'bar',
+            encode: { x: 'name', y: 'score' },
+            datasetIndex: 1,
+            itemStyle: {
+                normal: {
+                    color: function(params) {
+                        return params.data.color;
+                    }
+                }
+            }
+        }
+    };
+
+    barchart.setOption(barchartOption);
+
+    let piechart = echarts.init(document.getElementById('piechart'));
+    let piechartData = [];
+    for (const key in piechartRaw) {
+        piechartData.push({
+            name: key,
+            value: piechartRaw[key]
+        });
+    }
+    let pieOption = {
+        title: {
+            text: 'Problem Count With Corresponding Answer Count',
+            textStyle: {
+                fontStyle: 'oblique',
+                fontSize: 20,
+                color: '#4cc9f0'
+            },
+            left: 'center'
+        },
+        tooltip: {
+            trigger: 'item'
+        },
+        grid: {
+            width: '100%',
+            height: '100%'
+        },
+        legend: {
+            orient: 'vertical',
+            textStyle: {
+                fontSize: 20,
+                color: 'black'
+            },
+            right: 'center',
+            bottom: 'bottom',
+        },
+        series: [
+            {
+                name: 'Problem Count',
+                type: 'pie',
+                radius: '80%',
+                data: piechartData,
+                color: ['#9400D3', '#FF00FF', '#4169E1', '#3CB371',
+                    '#FFA500', '#FF7F50', '#DC143C', '#000080'],
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0.1, 0.2, 0, 0.5)',
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        label: {
+                            textStyle: {
+                                fontSize: 12,
+                                color: 'black'
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    };
+    piechart.setOption(pieOption);
+</script>
+
+</html>
