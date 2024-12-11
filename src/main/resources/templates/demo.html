@@ -18,16 +18,30 @@
     <option value="answer-quality">Answer Quality</option>
 </select>
 
-<button onclick="fetchData()">Fetch Data</button>
+<button onclick="handleClick()">Fetch Data</button>
 
 <!-- 展示图表 -->
 <canvas id="dataChart" width="400" height="200"></canvas>
 
 <script>
 
-    // Fetch data from the API and display it on the chart
-    async function fetchData() {
+    // 页面跳转功能
+    function handleClick() {
         const selectedTopic = document.getElementById('topic-select').value;
+
+        if (selectedTopic === 'java-topics') {
+            // 如果选择了 "Java Topics"，跳转到 Bing.html
+            window.location.href = 'Bing.html';  // 跳转到 Bing.html 页面
+        } else if(selectedTopic === 'user-engagement'){
+            window.location.href = 'User.html';
+        }
+        else {
+            fetchData(selectedTopic);  // 否则，获取数据并生成图表
+        }
+    }
+
+    // Fetch data from the API and display it on the chart
+    async function fetchData(selectedTopic) {
         const topN = 5;  // For example, request top 5 items
         const response = await fetch(`/api/${selectedTopic}?topN=${topN}`);
         const data = await response.json();
@@ -51,6 +65,7 @@
             }
         });
     }
+
 </script>
 </body>
 </html>

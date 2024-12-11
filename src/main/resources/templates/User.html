@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Charts</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.0.0/dist/echarts-wordcloud.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+
+
+        #input-container {
+            margin: 20px;
+        }
+
+        /* 使用flexbox来布局图表 */
+        #chart-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 80%;
+            flex-wrap: wrap; /* 如果屏幕小，会自动换行 */
+        }
+
+        .chart {
+            width: 30%;
+            height: 400px;
+        }
+
+        /* 屏幕小的时候自动换行 */
+        @media (max-width: 900px) {
+            #chart-container {
+                flex-direction: column;
+            }
+
+            .chart {
+                width: 80%;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div id="input-container">
+    <!-- 输入框和按钮 -->
+    <input type="number" id="numInput" placeholder="Enter a number" min="1">
+    <button onclick="updateChartData()">Show Top T Tags</button>
+    <button onclick="goBack()">Return</button>
+</div>
+
+<div id="chart-container">
+    <!-- 图表容器，使用flexbox进行布局 -->
+    <div id="pie" class="chart"></div>
+    <div id="bar" class="chart"></div>
+    <div id="wordcloud" class="chart"></div>
+</div>
+
+<script>
+    // 初始化饼状图
+    var pie = echarts.init(document.getElementById('pie'));
+    var bar = echarts.init(document.getElementById('bar'));
+    var wordcloud = echarts.init(document.getElementById('wordcloud'));
+
+    // 初始化饼状图的配置项
+    var pieOption = {
+        title: {
+            text: 'Tag Distribution'
+        },
+        tooltip: {
+            show: true,
+            trigger: "item",
+            backgroundColor: "#a5f3ab",
+            formatter: "{a}：{b}<br/>{c}({d}%)"
+        },
+        color: [
+            '#ff97b9', '#e19cf1', '#abb4f1', '#93c4f1',
+            '#ffd195', '#ffa387', '#c2a090', '#93c4f1',
+            '#009688', '#4CAF50', '#FFEB3B',
+            '#00BCD4', '#8BC34A', '#CDDC39'
+        ],
+        series: [
+            {
+                name: 'tag',
+                type: 'pie',
+                radius: '50%',
+                center: ['50%', '50%'],
+                data: [],
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true
+                        },
+                        labelLine: {
+                            show: true
+                        }
+                    },
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        ]
+    };
+
+    // 初始化柱状图的配置项
+    var barOption = {
+        title: {
+            text: 'Top Tags Bar Chart'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{b}: {c}'
+        },
+        xAxis: {
+            type: 'category',
+            data: []
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            name: 'Tag Count',
+            type: 'bar',
+            data: [],
+            itemStyle: {
+                normal: {
+                    color: function (params) {
+                        const colors = [
+                            '#ff97b9', '#e19cf1', '#abb4f1', '#93c4f1',
+                            '#ffd195', '#ffa387', '#c2a090', '#93c4f1',
+                            '#009688', '#4CAF50', '#FFEB3B',
+                            '#00BCD4', '#8BC34A', '#CDDC39'
+                        ];
+                        return colors[params.dataIndex % colors.length];
+                    }
+                }
+            }
+        }]
+    };
+
+    // 初始化词云图的配置项
+    var wordcloudOption = {
+        title: {
+            text: 'Tag Word Cloud'
+        },
+        tooltip: {},
+        series: [{
+            type: 'wordCloud',
+            gridSize: 2,
+            sizeRange: [12, 50],
+            rotationRange: [-90, 90],
+            shape: 'pentagon',
+            width: 600,
+            height: 400,
+            drawOutOfBound: true,
+            textStyle: {
+                color: function () {
+                    return 'rgb(' + [
+                        Math.round(Math.random() * 160),
+                        Math.round(Math.random() * 160),
+                        Math.round(Math.random() * 160)
+                    ].join(',') + ')';
+                }
+            },
+            emphasis: {
+                textStyle: {
+                    shadowBlur: 10,
+                    shadowColor: '#333'
+                }
+            },
+            data: []
+        }]
+    };
+
+
+    // 加载 JSON 文件
+    fetch('user_tag_counts.json')
+        .then(response => response.json())
+        .then(data => {
+            window.tagData = data; // 将数据保存到全局变量
+            // 初始渲染
+            updateChartData();
+        })
+        .catch(error => {
+            console.error("加载JSON文件时出错:", error);
+        });
+
+    // 根据用户输入的数字更新图表数据
+
+    function goBack() {
+        window.location.href = 'demo.html';  // 返回到 demo.html 页面
+    }
+
+    function updateChartData() {
+        var t = document.getElementById('numInput').value; // 获取用户输入的数字
+        t = Math.max(1, Math.min(t, window.tagData.length)); // 确保 t 不超过数据的总长度，最少为1
+
+        var newData = window.tagData.slice(0, t); // 获取前 t 条数据
+
+        // 更新饼状图数据
+        pieOption.series[0].data = newData;
+
+        // 更新柱状图数据
+        barOption.xAxis.data = newData.map(item => item.name); // 设置X轴标签
+        barOption.series[0].data = newData.map(item => item.value); // 设置Y轴数据
+
+        // 更新词云图数据
+        wordcloudOption.series[0].data = newData.map(item => ({
+            name: item.name,
+            value: item.value
+        }));
+
+        // 更新所有图表
+        pie.setOption(pieOption);
+        bar.setOption(barOption);
+        wordcloud.setOption(wordcloudOption);
+    }
+
+    // 窗口大小变化时自动调整图表大小
+    window.onresize = function () {
+        pie.resize();
+        bar.resize();
+        wordcloud.resize();
+    };
+</script>
+</body>
+
+</html>

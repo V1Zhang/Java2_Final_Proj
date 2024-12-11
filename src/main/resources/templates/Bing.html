@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Charts</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-wordcloud@2.0.0/dist/echarts-wordcloud.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+
+            background-image: url('../pic/bg1.jpg'); /* 替换为你的背景图片路径 */
+            background-size: cover;  /* 背景图片覆盖整个页面 */
+            background-position: center; /* 背景图片居中 */
+            background-attachment: fixed; /* 背景图片固定 */
+
+        }
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.7); /* 半透明白色 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4600px;
+            z-index: -1;  /* 确保它在内容层下面 */
+        }
+
+        #input-container {
+            margin: 20px;
+        }
+
+        /* 使用flexbox来布局图表 */
+        #chart-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 80%;
+            flex-wrap: wrap; /* 如果屏幕小，会自动换行 */
+        }
+
+        .chart {
+            width: 30%;
+            height: 400px;
+        }
+
+        /* 全宽的横向柱状图样式 */
+        .chart-full-width {
+            flex-basis: 100%; /* 占据整行 */
+            height: 4000px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+        }
+
+        /* 屏幕小的时候自动换行 */
+        @media (max-width: 900px) {
+            #chart-container {
+                flex-direction: column;
+            }
+
+            .chart {
+                width: 80%;
+                margin-bottom: 20px;
+            }
+        }
+
+
+
+
+    </style>
+</head>
+
+<body>
+<div class="overlay"></div>
+<div id="input-container">
+    <input type="number" id="numInput" placeholder="Enter a number" min="1">
+    <button onclick="updateChartData()">Show Top T Tags</button>
+    <button onclick="goBack()">Return</button>
+</div>
+
+
+<div id="chart-container">
+    <div id="pie" class="chart"></div>
+    <div id="bar" class="chart"></div>
+    <div id="wordcloud" class="chart"></div>
+    <div class="chart-full-width" id="heng-bar"></div>
+</div>
+
+<script>
+    // 初始化饼状图
+    var pie = echarts.init(document.getElementById('pie'));
+    var bar = echarts.init(document.getElementById('bar'));
+    var wordcloud = echarts.init(document.getElementById('wordcloud'));
+    var hengbar = echarts.init(document.getElementById('heng-bar'));
+
+    // 初始化饼状图的配置项
+    var pieOption = {
+        title: {
+            text: 'Tag Distribution'
+        },
+        tooltip: {
+            show: true,
+            trigger: "item",
+            backgroundColor: "#a5f3ab",
+            formatter: "{a}：{b}<br/>{c}({d}%)"
+        },
+        color: [
+            '#ff97b9', '#e19cf1', '#abb4f1', '#93c4f1',
+            '#ffd195', '#ffa387', '#c2a090', '#93c4f1',
+            '#2dd7c6', '#4CAF50', '#f8eea7',
+            '#3dcfe1', '#8BC34A', '#ebff3e'
+        ],
+        series: [
+            {
+                name: 'tag',
+                type: 'pie',
+                radius: '50%',
+                center: ['50%', '50%'],
+                data: [],
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true
+                        },
+                        labelLine: {
+                            show: true
+                        }
+                    },
+                    emphasis: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        ]
+    };
+
+    // 初始化柱状图的配置项
+    var barOption = {
+        title: {
+            text: 'Top Tags Bar Chart'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{b}: {c}'
+        },
+        xAxis: {
+            type: 'category',
+            data: []
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [{
+            name: 'Tag Count',
+            type: 'bar',
+            data: [],
+            itemStyle: {
+                normal: {
+                    color: function (params) {
+                        const colors = [
+                            '#ff97b9', '#e19cf1', '#abb4f1', '#93c4f1',
+                            '#ffd195', '#ffa387', '#c2a090', '#93c4f1',
+                            '#009688', '#4CAF50', '#FFEB3B',
+                            '#00BCD4', '#8BC34A', '#CDDC39'
+                        ];
+                        return colors[params.dataIndex % colors.length];
+                    }
+                }
+            }
+        }]
+    };
+
+    // 初始化词云图的配置项
+    var wordcloudOption = {
+        title: {
+            text: 'Tag Word Cloud'
+        },
+        tooltip: {},
+        series: [{
+            type: 'wordCloud',
+            gridSize: 2,
+            sizeRange: [12, 50],
+            rotationRange: [-90, 90],
+            shape: 'pentagon',
+            width: 600,
+            height: 400,
+            drawOutOfBound: true,
+            textStyle: {
+                color: function () {
+                    return 'rgb(' + [
+                        Math.round(Math.random() * 160),
+                        Math.round(Math.random() * 160),
+                        Math.round(Math.random() * 160)
+                    ].join(',') + ')';
+                }
+            },
+            emphasis: {
+                textStyle: {
+                    shadowBlur: 10,
+                    shadowColor: '#333'
+                }
+            },
+            data: []
+        }]
+    };
+
+    var Heng_barOption = {
+        title: {
+            text: 'Top Tags Heng Bar Chart'
+        },
+        tooltip: {
+            trigger: 'item',
+            formatter: '{b}: {c}'
+        },
+        xAxis: {
+            position: 'top',
+            type: 'value'
+        },
+        yAxis: {
+            type: 'category',
+            data: [],
+            inverse: true  // y轴从下到上排列
+        },
+        series: [{
+            name: 'Tag Count',
+            type: 'bar',
+            data: [],
+            barWidth: 20, // 固定柱子宽度
+            itemStyle: {
+                normal: {
+                    color: function (params) {
+                        const colors = [
+                            '#ff97b9', '#e19cf1', '#abb4f1', '#93c4f1',
+                            '#ffd195', '#ffa387', '#c2a090', '#93c4f1',
+                            '#009688', '#4CAF50', '#FFEB3B',
+                            '#00BCD4', '#8BC34A', '#CDDC39'
+                        ];
+                        return colors[params.dataIndex % colors.length];
+                    }
+                }
+            }
+        }]
+    };
+
+    function adjustHeight(chart, data) {
+        Heng_barOption.yAxis.data = data;  // 设置yAxis的data
+        Heng_barOption.yAxis.max = t;
+        var height = 20 + t * 20;
+        hengbar.style.height = height + 'px';  // 更新容器高度
+        hengbar.setOption(Heng_barOption);
+    }
+
+    var t = 100
+
+    // 直接从后端 API 获取数据
+    fetch(`http://localhost:9091/tags?limit=${t}`)
+        .then(response => response.json())
+        .then(data => {
+            // 更新饼状图数据
+            window.tagData = data;
+            pieOption.series[0].data = data;
+
+            // 更新柱状图数据
+            barOption.xAxis.data = data.map(item => item.name); // 设置X轴标签
+            barOption.series[0].data = data.map(item => item.value); // 设置Y轴数据
+            Heng_barOption.yAxis.data = data.map(item => item.name);
+            Heng_barOption.series[0].data = data.map(item => item.value);
+            // 更新词云图数据
+            wordcloudOption.series[0].data = data.map(item => ({
+                name: item.name,
+                value: item.value
+            }));
+
+            // 更新所有图表
+            pie.setOption(pieOption);
+            bar.setOption(barOption);
+            hengbar.setOption(Heng_barOption);
+            wordcloud.setOption(wordcloudOption);
+            adjustHeight(hengbar, t);
+        })
+        .catch(error => {
+            console.error("获取数据时出错:", error);
+        });
+
+    function goBack() {
+        window.location.href = 'demo.html';  // 返回到 demo.html 页面
+    }
+
+    function updateChartData() {
+        var t = document.getElementById('numInput').value; // 获取用户输入的数字
+        t = Math.max(1, Math.min(t, 100)); // 确保 t 不超过数据的总长度，最少为1
+
+        var newData = window.tagData.slice(0, t); // 获取前 t 条数据
+
+        // 更新饼状图数据
+        pieOption.series[0].data = newData;
+
+        // 更新柱状图数据
+        barOption.xAxis.data = newData.map(item => item.name); // 设置X轴标签
+        barOption.series[0].data = newData.map(item => item.value); // 设置Y轴数据
+        Heng_barOption.yAxis.data = newData.map(item => item.name);
+        Heng_barOption.series[0].data = newData.map(item => item.value);
+        wordcloudOption.series[0].data = newData.map(item => ({
+            name: item.name,
+            value: item.value
+        }));
+
+        // 更新所有图表
+        pie.setOption(pieOption);
+        bar.setOption(barOption);
+        wordcloud.setOption(wordcloudOption);
+        hengbar.setOption(Heng_barOption);
+    }
+
+    // 窗口大小变化时自动调整图表大小
+    window.onresize = function () {
+        pie.resize();
+        bar.resize();
+        wordcloud.resize();
+        hengbar.resize();
+    };
+</script>
+</body>
+
+</html>

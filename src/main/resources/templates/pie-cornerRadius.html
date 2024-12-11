@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script src="../dist/simpleRequire.js"></script>
+        <script src="../dist/config.js"></script>
+        <script src="../dist/jquery.min.js"></script>
+        <script src="../dist/facePrint.js"></script>
+        <script src="../dist/testHelper.js"></script>
+        <script src="../dist/echarts.js"></script>
+        <link rel="stylesheet" href="../dist/reset.css" />
+        <style>
+            .test-title-inner {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div id="main0"></div>
+
+        <script>
+        require([
+            'echarts'
+        ], function (echarts) {
+            var option;
+
+            var colorList = ['#dc67ce', '#7ddc67', '#8067dc', '#dc6967', '#dcd267', '#67b7dc'];
+            var outerCornerRadius = 5;
+            var innerCornerRadius = 5;
+            var usePercent = false;
+            var isCircular = false;
+            var isRounderOnEmphasis = false;
+            var roseType = 'area';
+            var randomTimer;
+            var data = [];
+            var topT = 5;
+
+
+            var inputContainer = document.createElement('div');
+            inputContainer.style.textAlign = 'center';
+            inputContainer.style.marginTop = '20px';
+
+            var label = document.createElement('label');
+            label.innerText = 'Enter number of top T data points:';
+            label.style.marginRight = '10px';
+            inputContainer.appendChild(label);
+
+            var input = document.createElement('input');
+            input.type = 'number';
+            input.value = 5;  // 默认值为 5
+            input.min = 1;
+            input.id = 'top-t-input';
+            input.style.padding = '5px';
+            input.style.marginRight = '10px';
+            inputContainer.appendChild(input);
+
+            var button = document.createElement('button');
+            button.innerText = 'Confirm';
+            button.id = 'top-t-button';
+            button.style.padding = '10px 20px';
+            button.style.cursor = 'pointer';
+            inputContainer.appendChild(button);
+
+            document.body.insertBefore(inputContainer, document.getElementById('main0').nextSibling);
+
+            document.getElementById('top-t-button').addEventListener('click', function () {
+                topT = document.getElementById('top-t-input').value;
+                loadData();
+            });
+
+            function loadData() {
+                fetch('user_tag_counts.json')  // 这里填入你的 JSON 文件路径
+                    .then(response => response.json())  // 解析 JSON 文件
+                    .then(jsonData => {
+                        // 假设jsonData是一个数组，按 value 排序并取前 T 个数据
+                        jsonData.sort((a, b) => b.value - a.value);  // 按照 value 值降序排序
+                        data = jsonData.slice(0, topT);  // 获取前T个数据
+
+                        updateChart();  // 更新图表
+                    })
+                    .catch(error => console.error('加载 JSON 文件失败:', error));
+            }
+
+            // 更新图表
+            function updateChart() {
+                option = {
+                    color: colorList,
+                    title: {
+                        text: getTitle()
+                    },
+                    tooltip: {},
+                    legend: {
+                        bottom: 0
+                    },
+                    series: {
+                        type: 'pie',
+                        roseType: 'area',
+                        selectedMode: 'single',
+                        selectedOffset: 30,
+                        label: {
+                            formatter: '{b} {c}({d}%)'
+                        },
+                        itemStyle: {
+                            borderRadius: getCornerRadius(),
+                        },
+                        data: echarts.util.clone(data)  // 使用更新后的数据
+                    }
+                };
+                function getTitle() {
+                    return 'The Top '+ topT+' Topic from High Reputation User';
+                }
+
+                function getCornerRadius() {
+                    return [
+                        innerCornerRadius + (usePercent ? '%' : ''),
+                        outerCornerRadius + (usePercent ? '%' : '')
+                    ];
+                }
+
+                function getEmphasisCornerRadius() {
+                    const cornerRadius = getCornerRadius();
+                    if (!isRounderOnEmphasis) {
+                        return cornerRadius;
+                    }
+                    const emphasisCornerRadius = [
+                        parseInt(cornerRadius[0], 10) * 2,
+                        parseInt(cornerRadius[1], 10) * 2
+                    ];
+                    if (usePercent) {
+                        emphasisCornerRadius[0] = emphasisCornerRadius[0] + '%';
+                        emphasisCornerRadius[1] = emphasisCornerRadius[1] + '%';
+                    }
+                    return emphasisCornerRadius;
+                }
+
+                var chart = testHelper.create(echarts, 'main0', {
+                    title: [
+                        'The top N topics that have the most engagement from users with **higher reputation scores**',
+                        '**Users**: We take 1079 from Overall reputation ranking'
+                    ],
+                    option: option,
+                    buttons: [
+                        {
+                            text: 'random cornerRadius',
+                            onclick: function () {
+                                outerCornerRadius = ~~(Math.random() * 50);
+                                innerCornerRadius = ~~(Math.random() * 50);
+                                chart.setOption({
+                                    title: {
+                                        text: getTitle()
+                                    },
+                                    series: [{
+                                        itemStyle: {borderRadius: getCornerRadius()},
+                                        emphasis: {
+                                            itemStyle: {borderRadius: getEmphasisCornerRadius()}
+                                        }
+                                    }]
+                                });
+                            }
+                        },
+                        {
+                            text: 'roseType',
+                            onclick: function () {
+                                roseType = roseType ? false : 'area';
+                                chart.setOption({
+                                    series: [{
+                                        roseType: roseType
+                                    }]
+                                });
+                            }
+                        },
+                        {
+                            text: 'circular',
+                            onclick: function () {
+                                var innerRadius;
+                                if (!isCircular) {
+                                    innerRadius = ~~(Math.random() * 70);
+                                }
+                                chart.setOption({
+                                    series: [{
+                                        radius: isCircular ? [0, '75%'] : [innerRadius + '%', '75%']
+                                    }]
+                                });
+                                this.innerText = 'circular' + (innerRadius ? ' ' + innerRadius + '%' : '');
+                                isCircular = !isCircular;
+                            }
+                        },
+                    ]
+                });
+            }
+            loadData();
+        });
+        </script>
+    </body>
+</html>
+
