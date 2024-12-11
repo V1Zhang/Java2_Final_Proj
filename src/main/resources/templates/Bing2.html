@@ -19,21 +19,23 @@
     <body>
 
         <div id="main0"></div>
-
         <script>
         require([
             'echarts'
         ], function (echarts) {
             var option;
 
-            var colorList = ['#dc67ce', '#7ddc67', '#8067dc', '#dc6967', '#dcd267', '#67b7dc'];
+            var colorList = ['#dc67ce', '#7ddc67', '#8067dc', '#dc6967', '#dcd267', '#67b7dc',
+                '#ff97b9', '#e19cf1', '#abb4f1', '#93c4f1',
+                '#ffd195', '#ffa387', '#c2a090', '#93c4f1',
+                '#009688', '#4CAF50', '#FFEB3B',
+                '#00BCD4', '#8BC34A', '#CDDC39'];
             var outerCornerRadius = 5;
             var innerCornerRadius = 5;
             var usePercent = false;
             var isCircular = false;
             var isRounderOnEmphasis = false;
             var roseType = 'area';
-            var randomTimer;
             var data = [];
             var topT = 5;
 
@@ -71,19 +73,17 @@
             });
 
             function loadData() {
-                fetch('user_tag_counts.json')  // 这里填入你的 JSON 文件路径
-                    .then(response => response.json())  // 解析 JSON 文件
+                fetch(`http://localhost:9091/Usertags?limit=${topT}`)
+                    .then(response => response.json())
                     .then(jsonData => {
-                        // 假设jsonData是一个数组，按 value 排序并取前 T 个数据
-                        jsonData.sort((a, b) => b.value - a.value);  // 按照 value 值降序排序
-                        data = jsonData.slice(0, topT);  // 获取前T个数据
+                        jsonData.sort((a, b) => b.value - a.value);
+                        data = jsonData.slice(0, topT);
 
                         updateChart();  // 更新图表
                     })
                     .catch(error => console.error('加载 JSON 文件失败:', error));
             }
 
-            // 更新图表
             function updateChart() {
                 option = {
                     color: colorList,
@@ -105,7 +105,7 @@
                         itemStyle: {
                             borderRadius: getCornerRadius(),
                         },
-                        data: echarts.util.clone(data)  // 使用更新后的数据
+                        data: echarts.util.clone(data)
                     }
                 };
                 function getTitle() {
@@ -136,10 +136,7 @@
                 }
 
                 var chart = testHelper.create(echarts, 'main0', {
-                    title: [
-                        'The top N topics that have the most engagement from users with **higher reputation scores**',
-                        '**Users**: We take 1079 from Overall reputation ranking'
-                    ],
+
                     option: option,
                     buttons: [
                         {
