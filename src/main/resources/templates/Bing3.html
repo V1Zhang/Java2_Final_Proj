@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="../dist/simpleRequire.js"></script>
+    <script src="../dist/config.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exception Data</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            background-image: url('../pic/bg3.jpg'); /* 替换为你的背景图片路径 */
+            background-size: cover;  /* 背景图片覆盖整个页面 */
+            background-position: center; /* 背景图片居中 */
+            background-attachment: fixed; /* 背景图片固定 */
+        }
+        .overlay {
+            background-color: rgba(255, 255, 255, 0.7); /* 半透明白色 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4600px;
+            z-index: -1;  /* 确保它在内容层下面 */
+        }
+
+        h2 {
+            text-align: center; /* 使标题水平居中 */
+            margin: 20px 0;      /* 调整上下边距 */
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            font-size: 16px;
+            line-height: 0.7;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .more-btn {
+            background-color: #964d47;
+            color: white;
+            padding: 2px 6px;
+            border: none;
+            cursor: pointer;
+        }
+        .more-btn:hover {
+            background-color: #c78b86;
+        }
+        .titles {
+            display: block;
+        }
+        .hidden-titles {
+            display: none;
+        }
+        .chart {
+            width: 100%;
+            height: 500px; /* 给图表设定一个高度 */
+            margin: 0;
+        }
+        #input-container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+<h2>Error and Exception Data Visualization</h2>
+
+<div id="input-container">
+    <input type="number" id="numInput" placeholder="Enter a number" min="1">
+    <button onclick="updateChartData()">Show Top N Type</button>
+    <button onclick="goBack()">Return</button>
+</div>
+
+<div class="overlay"></div>
+<!-- 图表容器 -->
+<div id="main1" class="chart"></div>
+
+<table id="exceptionTable">
+    <thead>
+    <tr>
+        <th>Name</th>
+        <th>Value</th>
+        <th>Titles</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Data will be inserted here -->
+    </tbody>
+</table>
+
+<script>
+    function goBack() {
+        window.location.href = 'demo.html';  // 返回到 demo.html 页面
+    }
+    var topN = 10
+
+    function updateChartData() {
+        topN = parseInt(document.getElementById('numInput').value);
+
+        if (isNaN(topN) || topN <= 0) {
+            alert('Please enter a valid number greater than 0.');
+            return;
+        }
+
+        // 过滤和排序数据
+        const sortedData = data.sort((a, b) => b.value - a.value); // 按 value 降序排序
+        const topNData = sortedData.slice(0, topN); // 取前 topN 个
+
+        // 更新表格数据
+        const tableBody = document.querySelector('#exceptionTable tbody');
+        tableBody.innerHTML = ''; // 清空现有表格内容
+
+        topNData.forEach(item => {
+            const row = document.createElement('tr');
+            const titleCell = document.createElement('td');
+            const titlesDiv = document.createElement('div');
+            titlesDiv.className = 'titles';
+
+            // Display the first 3 titles initially
+            const visibleTitles = item.title.slice(0, 3);
+            visibleTitles.forEach(title => {
+                const titleElement = document.createElement('p');
+                titleElement.textContent = title;
+                titlesDiv.appendChild(titleElement);
+            });
+
+            let moreBtn = null;
+            let hiddenTitlesDiv = null;
+
+            // If there are more than 3 titles, add a "More" button
+            if (item.title.length > 3) {
+                hiddenTitlesDiv = document.createElement('div');
+                hiddenTitlesDiv.className = 'hidden-titles';
+                const hiddenTitles = item.title.slice(3);
+                hiddenTitles.forEach(title => {
+                    const titleElement = document.createElement('p');
+                    titleElement.textContent = title;
+                    hiddenTitlesDiv.appendChild(titleElement);
+                });
+                titlesDiv.appendChild(hiddenTitlesDiv);
+
+                moreBtn = document.createElement('button');
+                moreBtn.className = 'more-btn';
+                moreBtn.textContent = 'More';
+                moreBtn.addEventListener('click', () => {
+                    const isHidden = hiddenTitlesDiv.style.display === 'none';
+                    hiddenTitlesDiv.style.display = isHidden ? 'block' : 'none';
+                    moreBtn.textContent = isHidden ? 'Less' : 'More';
+                });
+                titlesDiv.appendChild(moreBtn);
+            }
+
+            row.innerHTML = `
+                <td>${item.name}</td>
+                <td>${item.value}</td>
+            `;
+            row.appendChild(titleCell);
+            titleCell.appendChild(titlesDiv);
+            tableBody.appendChild(row);
+        });
+
+        // 更新图表
+        require(['echarts'], function (echarts) {
+            var chart1 = echarts.init(document.getElementById('main1'));
+
+            chart1.setOption({
+                tooltip: {
+                    position: ['50%', '50%'],
+                    backgroundColor: 'transparent',
+                    formatter: function (params) {
+                        return `<div class="tooltip-content">
+                                    <h4>${params.name}</h4>
+                                    <h5>${params.percent.toFixed(1)}%</h5>
+                                </div>`;
+                    },
+                    borderWidth: 0,
+                    shadowColor: 'transparent'
+                },
+                series: [{
+                    name: 'pie',
+                    type: 'pie',
+                    selectedMode: 'single',
+                    selectedOffset: 30,
+                    clockwise: true,
+                    radius: ['40%', '70%'],
+                    label: {
+                        formatter: '{b} {c}({d}%)'
+                    },
+                    labelLine: {
+                        show: true
+                    },
+                    data: topNData.map(item => ({
+                        value: item.value,
+                        name: item.name
+                    }))
+                }]
+            });
+        });
+    }
+
+    // 从 JSON 文件加载数据
+    let data = [];
+
+    fetch(`http://localhost:9091/errorStats?limit=${topN}`)
+        .then(response => response.json())
+        .then(jsonData => {
+            data = jsonData;
+        })
+        .catch(error => console.error('Error loading JSON data:', error));
+</script>
+
+</body>
+</html>
