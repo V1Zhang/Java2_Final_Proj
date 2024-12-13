@@ -23,7 +23,7 @@ public class TagCounter {
 
 @RestController
 class TagController {
-
+    //Users can query the top N topics sorted by frequency.
     @CrossOrigin(origins = "http://localhost:63342")
     @GetMapping("/tags")
     public List<Map<String, Object>> getTags(@RequestParam(defaultValue = "10") int limit) {
@@ -58,6 +58,15 @@ class TagController {
                 .limit(limit)
                 .collect(Collectors.toList());
 
+        return formatResult(sortedList);
+    }
+
+    /**
+     * 将 Map 转换为 List<Map> 格式
+     * @param sortedList 按频率排序的主题列表
+     * @return 返回格式化后的结果
+     */
+    private List<Map<String, Object>> formatResult(List<Map.Entry<String, Integer>> sortedList) {
         List<Map<String, Object>> result = new ArrayList<>();
         for (Map.Entry<String, Integer> entry : sortedList) {
             Map<String, Object> tag = new HashMap<>();
@@ -65,6 +74,42 @@ class TagController {
             tag.put("value", entry.getValue());
             result.add(tag);
         }
+        return result;
+    }
+
+
+// Users can query the frequency of a specific topic
+    @CrossOrigin(origins = "http://localhost:63342")
+    @GetMapping("/tags/specific")
+    public Map<String, Object> getSpecificTagFrequency(@RequestParam String tagName) {
+        String url = "jdbc:postgresql://localhost:5432/postgres";
+        String user = "java2";
+        String password = "Java2";
+
+        int frequency = 0; // 用于存储特定标签的频率
+        try (Connection conn = DriverManager.getConnection(url, user, password)) {
+            String sql = "SELECT tags FROM stackoverflow_questions";
+            try (Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+                while (rs.next()) {
+                    Array tagsArray = rs.getArray("tags");
+                    if (tagsArray != null) {
+                        String[] tags = (String[]) tagsArray.getArray();
+                        for (String tag : tags) {
+                            if (tag.equalsIgnoreCase(tagName)) {
+                                frequency++;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // 返回结果
+        Map<String, Object> result = new HashMap<>();
+        result.put("tagName", tagName);
+        result.put("frequency", frequency);
         return result;
     }
 }

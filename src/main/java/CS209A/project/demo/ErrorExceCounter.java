@@ -32,7 +32,7 @@ public class ErrorExceCounter {
 class ErrorExceController {
 
     @CrossOrigin(origins = "http://localhost:63342")
-    @GetMapping("/errorStats")
+    @GetMapping(value = "/errorStats", produces = "application/json")
     public String getErrorStatistics(@RequestParam(defaultValue = "20") int limit) {
         // 数据库连接信息
         String url = "jdbc:postgresql://localhost:5432/postgres";
@@ -120,5 +120,47 @@ class ErrorExceController {
             e.printStackTrace();
             return "{}";
         }
+    }
+
+
+    //  Users can query the frequency of a specific error or exception
+    @CrossOrigin(origins = "http://localhost:63342")
+    @GetMapping("/errorStats/specific")
+    public Map<String, Object> getSpecificErrorFrequency(@RequestParam String errorType) {
+        String url = "jdbc:postgresql://localhost:5432/postgres";
+        String user = "java2";
+        String password = "Java2";
+
+        int frequency = 0;
+        List<String> questionTitles = new ArrayList<>();
+
+        try (Connection connection = DriverManager.getConnection(url, user, password)) {
+            String query = "SELECT\n" +
+                    "    q.links, q.question_title\n" +
+                    "FROM stackoverflow_answers a\n" +
+                    "JOIN stackoverflow_questions q ON a.question_id = q.links\n" +
+                    "WHERE a.answer_text LIKE ? OR q.question_title LIKE ?;";
+
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                String wildcardErrorType = "%" + errorType + "%";
+                pstmt.setString(1, wildcardErrorType);
+                pstmt.setString(2, wildcardErrorType);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        frequency++;
+                        questionTitles.add(rs.getString("question_title"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("errorType", errorType);
+        result.put("frequency", frequency);
+        result.put("titles", questionTitles);
+        return result;
     }
 }
