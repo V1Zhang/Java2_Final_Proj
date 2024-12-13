@@ -68,19 +68,47 @@
                 margin-bottom: 20px;
             }
         }
+        .button {
+            padding: 10px 20px;
+            background-color: rgb(198, 222, 253);
+            color: rgba(95, 158, 160, 0.98);
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            width: 350px;
+        }
 
+        .button:hover {
+            background-color: rgba(27, 83, 189, 0.58); /* 鼠标悬停时的背景色 */
+            color: rgb(255, 255, 255);
+        }
 
+        .input-style {
+            padding: 10px 20px;
+            background-color: rgb(255, 255, 255);
+            text-decoration: none;
+            border: 2px solid rgba(27, 83, 189, 0.58);
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            width: 250px;
+            color: #333; /* 输入文本颜色 */
+        }
 
 
     </style>
 </head>
 
 <body>
+<h2>Top Popular Java Topics</h2>
 <div class="overlay"></div>
 <div id="input-container">
-    <input type="number" id="numInput" placeholder="Enter a number" min="1">
-    <button onclick="updateChartData()">Show Top T Tags</button>
-    <button onclick="goBack()">Return</button>
+    <input type="number" id="numInput" class="input-style" placeholder="Enter a number" min="1">
+    <button class="button" onclick="updateChartData()">Show Top T Tags</button>
+    <button class="button" onclick="goBack()">Return</button>
 </div>
 
 

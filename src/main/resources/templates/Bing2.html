@@ -11,14 +11,49 @@
         <script src="../dist/echarts.js"></script>
         <link rel="stylesheet" href="../dist/reset.css" />
         <style>
-            .test-title-inner {
+            h2 {
+                font-size: 24px;
+                color: #333;
+                margin-bottom: 20px; /* 与主体部分的间距 */
                 text-align: center;
             }
+
+            button {
+                padding: 10px 20px;
+                background-color: rgb(198, 222, 253);
+                color: rgba(95, 158, 160, 0.98);
+                text-decoration: none;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+                text-align: center;
+                width: 350px;
+            }
+
+            button:hover {
+                background-color: rgba(27, 83, 189, 0.58); /* 鼠标悬停时的背景色 */
+                color: rgb(255, 255, 255);
+            }
+
+            input-style {
+                padding: 10px 20px;
+                background-color: rgb(255, 255, 255);
+                text-decoration: none;
+                border: 2px solid rgba(27, 83, 189, 0.58);
+                border-radius: 5px;
+                font-size: 16px;
+                text-align: center;
+                width: 250px;
+                color: #333; /* 输入文本颜色 */
+            }
+
         </style>
     </head>
     <body>
-
+        <h2>Topics With Most Engagement From Users</h2>
         <div id="main0"></div>
+
         <script>
         require([
             'echarts'
@@ -51,18 +86,16 @@
 
             var input = document.createElement('input');
             input.type = 'number';
-            input.value = 5;  // 默认值为 5
+            input.value = 5; // 默认值为 5
             input.min = 1;
             input.id = 'top-t-input';
-            input.style.padding = '5px';
-            input.style.marginRight = '10px';
+            input.className = 'input-style'; // 应用 input-style 样式类
             inputContainer.appendChild(input);
 
             var button = document.createElement('button');
             button.innerText = 'Confirm';
             button.id = 'top-t-button';
-            button.style.padding = '10px 20px';
-            button.style.cursor = 'pointer';
+            button.className = 'button'; // 应用 button 样式类
             inputContainer.appendChild(button);
 
             document.body.insertBefore(inputContainer, document.getElementById('main0').nextSibling);
@@ -189,7 +222,13 @@
             }
             loadData();
         });
+        function goBack() {
+            window.location.href = 'demo.html';  // 返回到 demo.html 页面
+        }
         </script>
+        <div id="footer">
+            <button id="return-button" onclick="goBack()">Return</button>
+        </div>
     </body>
 </html>
 

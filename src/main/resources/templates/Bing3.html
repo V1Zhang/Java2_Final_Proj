@@ -20,6 +20,9 @@
             background-position: center; /* 背景图片居中 */
             background-attachment: fixed; /* 背景图片固定 */
         }
+        .hidden {
+            display: none; /* 隐藏元素 */
+        }
         .overlay {
             background-color: rgba(255, 255, 255, 0.7); /* 半透明白色 */
             position: absolute;
@@ -75,13 +78,42 @@
         #input-container {
             margin: 20px;
         }
+        button {
+            padding: 10px 20px;
+            background-color: rgb(198, 222, 253);
+            color: rgba(95, 158, 160, 0.98);
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            width: 350px;
+        }
+
+        button:hover {
+            background-color: rgba(27, 83, 189, 0.58); /* 鼠标悬停时的背景色 */
+            color: rgb(255, 255, 255);
+        }
+
+        .input-style {
+            padding: 10px 20px;
+            background-color: rgb(255, 255, 255);
+            text-decoration: none;
+            border: 2px solid rgba(27, 83, 189, 0.58);
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+            width: 250px;
+            color: #333; /* 输入文本颜色 */
+        }
     </style>
 </head>
 <body>
 <h2>Error and Exception Data Visualization</h2>
 
 <div id="input-container">
-    <input type="number" id="numInput" placeholder="Enter a number" min="1">
+    <input type="number" id="numInput" class="input-style" placeholder="Enter a number" min="1">
     <button onclick="updateChartData()">Show Top N Type</button>
     <button onclick="goBack()">Return</button>
 </div>
@@ -91,14 +123,14 @@
 <div id="main1" class="chart"></div>
 
 <table id="exceptionTable">
-    <thead>
+    <thead class="hidden">
     <tr>
         <th>Name</th>
         <th>Value</th>
         <th>Titles</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody class="hidden">
     <!-- Data will be inserted here -->
     </tbody>
 </table>
@@ -116,6 +148,10 @@
             alert('Please enter a valid number greater than 0.');
             return;
         }
+
+        // 显示表格标题和内容
+        document.querySelector('#exceptionTable thead').classList.remove('hidden');
+        document.querySelector('#exceptionTable tbody').classList.remove('hidden');
 
         // 过滤和排序数据
         const sortedData = data.sort((a, b) => b.value - a.value); // 按 value 降序排序
@@ -161,6 +197,17 @@
                     const isHidden = hiddenTitlesDiv.style.display === 'none';
                     hiddenTitlesDiv.style.display = isHidden ? 'block' : 'none';
                     moreBtn.textContent = isHidden ? 'Less' : 'More';
+
+                    // 自动调整滚动条高度
+                    if (isHidden) {
+                        titlesDiv.style.height = 'auto'; // 展开内容时高度自动调整
+                    } else {
+                        titlesDiv.style.height = ''; // 收起内容时恢复原始高度
+                    }
+
+                    // 调整滚动条位置，确保在内容缩小时页面高度减少
+                    document.body.style.height = document.body.scrollHeight + 'px';
+
                 });
                 titlesDiv.appendChild(moreBtn);
             }

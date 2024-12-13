@@ -14,7 +14,39 @@
     #main {
         background: #fff;
     }
+    button {
+        padding: 10px 20px;
+        background-color: rgb(198, 222, 253);
+        color: rgba(95, 158, 160, 0.98);
+        text-decoration: none;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        width: 350px;
+    }
+
+    button:hover {
+        background-color: rgba(27, 83, 189, 0.58); /* 鼠标悬停时的背景色 */
+        color: rgb(255, 255, 255);
+    }
+    h2 {
+        font-size: 24px;
+        color: #333;
+        margin-bottom: 20px; /* 与主体部分的间距 */
+        text-align: center;
+    }
+    #footer {
+        display: flex; /* 使用 flexbox 布局 */
+        justify-content: center; /* 水平居中 */
+        align-items: center; /* 垂直居中 */
+        gap: 20px; /* 按钮之间的间距 */
+        margin-top: 20px; /* 距离页面其他部分的间距 */
+    }
+
 </style>
+<h2>Top Popular Java Topics</h2>
 <div id="main"></div>
 <script>
     // 使用 CDN 引入 ECharts
@@ -209,7 +241,18 @@
         .catch(error => {
             console.error('获取数据失败:', error);
         });
+    function goBack() {
+        window.location.href = 'demo.html';  // 返回到 demo.html 页面
+    }
+    function showScatterDiagram() {
+        window.location.href = 'Bing4_ScatterDiagram.html';
+    }
 
 </script>
+<div id="footer">
+    <button id="ScatterDiagram" onclick="showScatterDiagram()">Show Scatter Diagram</button>
+    <button id="return-button" onclick="goBack()">Return</button>
+</div>
+
 </body>
 </html>

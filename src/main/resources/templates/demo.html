@@ -3,69 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Analysis Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>StackOverflow Data Analysis</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%; /* 确保 html 和 body 占满整个视口 */
+            overflow: hidden; /* 防止全局滚动 */
+        }
+
+        .container {
+            height: 100vh; /* 容器占满视口高度 */
+            overflow-y: scroll; /* 允许垂直滚动 */
+            scroll-snap-type: y mandatory; /* 强制垂直滚动对齐 */
+            scroll-behavior: smooth; /* 平滑滚动 */
+        }
+
+        .page {
+            position: relative; /* 确保子元素可以绝对定位 */
+            height: 100vh; /* 每个页面的高度占满一屏 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            scroll-snap-align: start; /* 每个页面开始位置对齐 */
+            font-size: 24px;
+            padding: 20px;
+            overflow: hidden; /* 防止内容溢出 */
+        }
+
+        /* 背景颜色交替 */
+        .page:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        .page:nth-child(even) {
+            background-color: #c6defd;
+        }
+        .content-wrapper {
+            display: flex;
+            justify-content: space-between; /* 左右两部分之间自动分隔 */
+            align-items: center; /* 垂直方向居中 */
+            width: 100%;
+            height: 100%; /* 填满父容器 */
+            padding: 20px; /* 增加内边距 */
+        }
+
+        .left-content {
+            flex: 1; /* 左侧占据一半的宽度 */
+            padding: 20px;
+        }
+
+        .right-content {
+            flex: 1; /* 右侧占据一半的宽度 */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 水平居中 */
+            justify-content: center; /* 垂直居中 */
+            left: 50px;
+        }
+
+        .right-content .image {
+            width: 80%; /* 调整图片的宽度 */
+            max-width: 500px; /* 限制图片最大宽度 */
+            margin-bottom: 30px; /* 图片与按钮之间的间距 */
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #1475ef;
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            width: 350px;
+        }
+
+        .button:hover {
+            background-color: #143c6e;
+        }
+
+        /* 背景视频容器 */
+        .bg-wrapper {
+            position: absolute; /* 视频全屏覆盖页面 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* 视频放置在最底层 */
+            overflow: hidden; /* 防止溢出 */
+        }
+
+        .bg-wrapper video {
+            width: 100%; /* 宽度填充容器 */
+            height: 100%; /* 高度填充容器 */
+            object-fit: cover; /* 保持比例覆盖容器 */
+            z-index: -1;
+        }
+
+        /* 页面内容容器 */
+        .section-content-wrap {
+            position: relative; /* 内容相对定位 */
+            right: 400px;
+            z-index: 2; /* 内容层级高于视频 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #72a5e3; /* 文字颜色 */
+            text-align: center;
+        }
+
+    </style>
 </head>
 <body>
-<h1>Data Analysis Dashboard</h1>
+<div class="container">
+    <!-- 页面1 -->
+    <div class="page">
+        <div class="bg-wrapper">
+            <!-- 背景视频 -->
+            <video loop="loop" muted="muted" autoplay="autoplay" playsinline>
+                <source src="https://s0.spsspro.com/sp-webfed/media/home-bg.31c7659b.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        <div class="section-content-wrap">
+            <img src="../pic/Stackoverflow.png" alt="Logo" width="500">
+            <h2 class="slogan-text">Make Stackoverflow Data Visible</h2>
+            <div class="sub-slogan-text">
+                <span style="color: rgb(26, 120, 255);">Designed by Jasmer & V1</span>
+                <span style="color: rgb(26, 120, 255);">in CS209</span>
+            </div>
+        </div>
+    </div>
 
-<!-- 选择分析问题 -->
-<label for="topic-select">Select a topic analysis:</label>
-<select id="topic-select">
-    <option value="java-topics">Java Topics</option>
-    <option value="user-engagement">User Engagement</option>
-    <option value="common-mistakes">Common Mistakes</option>
-    <option value="answer-quality">Answer Quality</option>
-</select>
+    <!-- 页面2 -->
+    <div class="page">
+        <div class="content-wrapper">
+            <!-- 左侧文字部分 -->
+            <div class="left-content">
+                <h1>Java Topics</h1>
+                <p>Have you ever wondered which of the topics about Java are the most frequently discussed or questioned on Stack Overflow?</p>
+            </div>
 
-<button onclick="handleClick()">Fetch Data</button>
+            <!-- 右侧图片和按钮部分 -->
+            <div class="right-content">
+                <img src="../pic/VCG211334513223.png" alt="Java Topics Image" class="image">
+                <a href="Bing1.html" class="button">Continue to explore...</a>
+            </div>
+        </div>
+    </div>
 
-<!-- 展示图表 -->
-<canvas id="dataChart" width="400" height="200"></canvas>
+    <!-- 页面3 -->
+    <div class="page">
+        <div class="content-wrapper">
+            <!-- 左侧文字部分 -->
+            <div class="left-content">
+                <h1>User Engagement</h1>
+                <p> Do you know what are the top N topics that have the most engagement from users with higher reputation scores? </p>
+            </div>
 
-<script>
+            <!-- 右侧图片和按钮部分 -->
+            <div class="right-content">
+                <img src="../pic/VCG211334513225.png" alt="User Engagement Image" class="image">
+                <a href="Bing2.html" class="button">Continue to explore...</a>
+            </div>
+        </div>
+    </div>
 
-    // 页面跳转功能
-    function handleClick() {
-        const selectedTopic = document.getElementById('topic-select').value;
+    <!-- 页面4 -->
+    <div class="page">
+        <div class="content-wrapper">
+            <!-- 左侧文字部分 -->
+            <div class="left-content">
+                <h1>Common Mistakes</h1>
+                <p> Developers make mistakes, which result in bugs in the code. Bugs manifest themselves as errors or
+                    exceptions. What are the top N errors and exceptions that are frequently discussed by Java developers?
+                </p>
+            </div>
 
-        if (selectedTopic === 'java-topics') {
-            // 如果选择了 "Java Topics"，跳转到 Bing.html
-            window.location.href = 'Bing.html';  // 跳转到 Bing.html 页面
-        } else if(selectedTopic === 'user-engagement'){
-            window.location.href = 'User.html';
-        }
-        else {
-            fetchData(selectedTopic);  // 否则，获取数据并生成图表
-        }
-    }
+            <!-- 右侧图片和按钮部分 -->
+            <div class="right-content">
+                <img src="../pic/VCG211334513226.png" alt="User Engagement Image" class="image">
+                <a href="Bing3.html" class="button">Continue to explore...</a>
+            </div>
+        </div>
+    </div>
 
-    // Fetch data from the API and display it on the chart
-    async function fetchData(selectedTopic) {
-        const topN = 5;  // For example, request top 5 items
-        const response = await fetch(`/api/${selectedTopic}?topN=${topN}`);
-        const data = await response.json();
+    <!-- 页面5 -->
+    <div class="page">
+        <div class="content-wrapper">
+            <!-- 左侧文字部分 -->
+            <div class="left-content">
+                <h1>Answer Quality</h1>
+                <p> We consider an answer to be "high-quality" if it is accepted or has many upvotes. What
+                    factors contribute to high-quality answers? Maybe the interval between answers and questions,
+                    the reputation of the respondent, or length of the answer? </p>
+            </div>
 
-        // 处理返回数据，生成图表
-        const labels = data;
-        const values = Array(data.length).fill(10);  // 示例：这里直接生成10的值，实际使用时可以根据具体需求生成数据
-
-        const ctx = document.getElementById('dataChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: selectedTopic,
-                    data: values,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            }
-        });
-    }
-
-</script>
+            <!-- 右侧图片和按钮部分 -->
+            <div class="right-content">
+                <img src="../pic/VCG211337415708.png" alt="User Engagement Image" class="image">
+                <a href="Bing4.html" class="button">Continue to explore...</a>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
