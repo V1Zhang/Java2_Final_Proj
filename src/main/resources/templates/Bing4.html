@@ -1,17 +1,37 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="../dist/echarts.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
 <style>
-    html, body, #main {
+    html {
         width: 100%;
         height: 100%;
         margin: 0;
     }
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-image: url('../pic/bg2.jpg'); /* 背景图片路径 */
+        background-size: cover; /* 背景图片覆盖整个页面 */
+        background-position: center; /* 背景图片居中 */
+        background-attachment: fixed; /* 背景图片固定 */
+        background-color: rgba(255, 255, 255, 0.7); /* 半透明白色背景层 */
+        background-blend-mode: overlay; /* 将背景颜色与图片叠加 */
+        position: relative;
+        min-height: 100vh; /* 页面高度占满视口 */
+        display: flex;
+        flex-direction: column; /* 内容纵向排列 */
+    }
     #main {
+        width: 90%;
+        height: 90%;
+        position: absolute;
+        top: 52%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         background: #fff;
     }
     button {
@@ -42,7 +62,11 @@
         justify-content: center; /* 水平居中 */
         align-items: center; /* 垂直居中 */
         gap: 20px; /* 按钮之间的间距 */
-        margin-top: 20px; /* 距离页面其他部分的间距 */
+        position: fixed; /* 固定在页面底部 */
+        bottom: 20px; /* 距离底部 20px */
+        left: 0;
+        width: 100%;
+        z-index: 1000; /* 确保层级高于其他元素 */
     }
 
 </style>

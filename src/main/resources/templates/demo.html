@@ -116,7 +116,38 @@
             color: #72a5e3; /* 文字颜色 */
             text-align: center;
         }
+        .bottom-page {
+            position: relative; /* 确保子元素可以绝对定位 */
+            height: 100vh; /* 每个页面的高度占满一屏 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            scroll-snap-align: start; /* 每个页面开始位置对齐 */
+            font-size: 24px;
+            padding: 20px;
+            overflow: hidden; /* 防止内容溢出 */
+            background-color: rgba(255, 255, 255, 0.5); /* 80% 不透明度的白色叠加 */
+        }
+        #us {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 图片保持比例填充容器 */
+            z-index: 1;
+            opacity: 0.5;
+        }
 
+        .overlay-text {
+            position: absolute;
+            top: 50%; /* 垂直居中 */
+            left: 50%; /* 水平居中 */
+            transform: translate(-50%, -50%); /* 修正居中偏移 */
+            text-align: center;
+            z-index: 2; /* 确保文字在图片上方 */
+        }
     </style>
 </head>
 <body>
@@ -133,10 +164,7 @@
         <div class="section-content-wrap">
             <img src="../pic/Stackoverflow.png" alt="Logo" width="500">
             <h2 class="slogan-text">Make Stackoverflow Data Visible</h2>
-            <div class="sub-slogan-text">
-                <span style="color: rgb(26, 120, 255);">Designed by Jasmer & V1</span>
-                <span style="color: rgb(26, 120, 255);">in CS209</span>
-            </div>
+
         </div>
     </div>
 
@@ -211,6 +239,19 @@
             </div>
         </div>
     </div>
+
+    <div class="bottom-page">
+        <div class="content-wrapper">
+            <div class="overlay-text">
+                <div class="sub-slogan-text">
+                    <span style="color: rgb(26, 120, 255); font-size: 24px;">Designed by Jasmer & V1</span><br>
+                    <span style="color: rgb(26, 120, 255); font-size: 20px;">In CS209 - 24Fall</span>
+                </div>
+            </div>
+            <img id="us" src="../pic/bg1.jpg" alt="User Engagement Image" class="image">
+        </div>
+    </div>
+
 </div>
 </body>
 </html>
