@@ -27,9 +27,9 @@ public class ErrorExceCounter {
 @RestController
 class ErrorExceController {
 
-    @CrossOrigin(origins = "http://localhost:63342")  // 跨域访问设置（如果前端在不同端口）
+    @CrossOrigin(origins = "http://localhost:63342")
     @GetMapping("/errorStats")
-    public String getErrorStatistics(@RequestParam(defaultValue = "10") int limit) {
+    public String getErrorStatistics(@RequestParam(defaultValue = "20") int limit) {
         // 数据库连接信息
         String url = "jdbc:postgresql://localhost:5432/postgres";
         String user = "java2";
@@ -100,13 +100,14 @@ class ErrorExceController {
         int count = 0;
         for (Map.Entry<String, List<String>> entry : errorData.entrySet()) {
             if (count >= limit) break;
-
-            ObjectNode node = objectMapper.createObjectNode();
-            node.put("name", entry.getKey());  // 错误类型
-            node.put("value", entry.getValue().size());  // 错误类型对应的问题个数
-            node.putPOJO("title", entry.getValue().toArray(new String[0]));  // 错误类型对应的问题标题数组
-            jsonArray.add(node);
-            count++;
+            if(!entry.getKey().equals("Other Error")){
+                ObjectNode node = objectMapper.createObjectNode();
+                node.put("name", entry.getKey());  // 错误类型
+                node.put("value", entry.getValue().size());  // 错误类型对应的问题个数
+                node.putPOJO("title", entry.getValue().toArray(new String[0]));  // 错误类型对应的问题标题数组
+                jsonArray.add(node);
+                count++;
+            }
         }
         try {
             // 将结果作为 JSON 字符串返回

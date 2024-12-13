@@ -1,0 +1,75 @@
+{
+  "textLengthCategories" : [ {
+    "category" : "短答案",
+    "count" : 1580,
+    "avgTextLength" : 131.1867088607595,
+    "avgReputation" : 28991.306329113922,
+    "avgTimeInterval" : 3314.4545648880685,
+    "avgVoteNum" : 39.844303797468356
+  }, {
+    "category" : "中等答案",
+    "count" : 5482,
+    "avgTextLength" : 496.06694636993797,
+    "avgReputation" : 31206.0846406421,
+    "avgTimeInterval" : 4538.1393941514825,
+    "avgVoteNum" : 55.300620211601604
+  }, {
+    "category" : "长答案",
+    "count" : 2094,
+    "avgTextLength" : 2163.3352435530087,
+    "avgReputation" : 42161.50477554919,
+    "avgTimeInterval" : 4647.974124256031,
+    "avgVoteNum" : 81.95749761222541
+  } ],
+  "reputationCategories" : [ {
+    "category" : "低声誉",
+    "count" : 5869,
+    "avgTextLength" : 779.9856875106492,
+    "avgReputation" : 2355.7865053671835,
+    "avgTimeInterval" : 3969.0971332976783,
+    "avgVoteNum" : 38.791787357301075
+  }, {
+    "category" : "中声誉",
+    "count" : 46,
+    "avgTextLength" : 927.8695652173913,
+    "avgReputation" : 10000.0,
+    "avgTimeInterval" : 3428.5054511372787,
+    "avgVoteNum" : 87.30434782608695
+  }, {
+    "category" : "高声誉",
+    "count" : 3241,
+    "avgTextLength" : 875.1373033014502,
+    "avgReputation" : 89749.49089787103,
+    "avgTimeInterval" : 5058.757748033729,
+    "avgVoteNum" : 94.42949706880593
+  } ],
+  "timeCategories" : [ {
+    "category" : "1年内",
+    "count" : 1344,
+    "avgTextLength" : 572.5491071428571,
+    "avgReputation" : 82227.04836309524,
+    "avgTimeInterval" : 45.265905688519624,
+    "avgVoteNum" : 51.70386904761905
+  }, {
+    "category" : "1-5年",
+    "count" : 2383,
+    "avgTextLength" : 735.9744020142678,
+    "avgReputation" : 27304.785984053713,
+    "avgTimeInterval" : 1179.457262282215,
+    "avgVoteNum" : 48.3978178766261
+  }, {
+    "category" : "5-10年",
+    "count" : 3868,
+    "avgTextLength" : 849.8443640124095,
+    "avgReputation" : 22907.911065149947,
+    "avgTimeInterval" : 2695.63726664237,
+    "avgVoteNum" : 61.36271975180972
+  }, {
+    "category" : "10年以上",
+    "count" : 1561,
+    "avgTextLength" : 1054.5848814862268,
+    "avgReputation" : 26249.809737347852,
+    "avgTimeInterval" : 17008.050741074392,
+    "avgVoteNum" : 74.02818705957719
+  } ]
+}

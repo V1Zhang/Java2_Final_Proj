@@ -1,167 +1,215 @@
 <html>
-    <head>
-        <meta charset="utf-8">
-        <script src="../dist/simpleRequire.js"></script>
-        <script src="../dist/config.js"></script>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
-    <body>
-        <style>
-            html, body, #main {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-            }
-            #main {
-                background: #fff;
-            }
-        </style>
-        <div id="main"></div>
-        <script>
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+<style>
+    html, body, #main {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+    #main {
+        background: #fff;
+    }
+</style>
+<div id="main"></div>
+<script>
+    // 使用 CDN 引入 ECharts
+    var chart = echarts.init(document.getElementById('main'));
 
-            require(['echarts'], function (echarts) {
+    // 使用 fetch 请求外部的 JSON 数据
+    fetch('answer_analysis7.json')  // 替换为实际 JSON 文件的 URL 或路径
+        .then(response => response.json())  // 解析 JSON 数据
+        .then(jsonData => {
+            // 获取并处理 JSON 数据
+            console.log(jsonData)
+            // 定义 X 轴的分析维度
+            var xAxisData = [
+                '短答案',
+                '中等答案',
+                '长答案',
+                '低声誉用户',
+                '中声誉用户',
+                '高声誉用户',
+                '时间间隔 1年内',
+                '时间间隔 1-5年',
+                '时间间隔 5-10年',
+                '时间间隔 10年以上'
+            ];
 
-                var chart = echarts.init(document.getElementById('main'));
+            const mergedData = [
+                // textLengthCategories
+                ...jsonData.textLengthCategories.map(item => ({
+                    category: item.category,
+                    avgTextLength: item.avgTextLength,
+                    avgReputation: item.avgReputation,
+                    avgTimeInterval: item.avgTimeInterval,
+                    avgVoteNum: item.avgVoteNum
+                })),
+                // reputationCategories
+                ...jsonData.reputationCategories.map(item => ({
+                    category: item.category,
+                    avgTextLength: item.avgTextLength,
+                    avgReputation: item.avgReputation,
+                    avgTimeInterval: item.avgTimeInterval,
+                    avgVoteNum: item.avgVoteNum
+                })),
+                // timeCategories
+                ...jsonData.timeCategories.map(item => ({
+                    category: item.category,
+                    avgTextLength: item.avgTextLength,
+                    avgReputation: item.avgReputation,
+                    avgTimeInterval: item.avgTimeInterval,
+                    avgVoteNum: item.avgVoteNum
+                }))
+            ];
+            // 输出合并后的数据
+            console.log('合并后的数据:', mergedData);
 
-                var xAxisData = [];
-                var data0 = [];
-                var data1 = [];
-                var data2 = [];
-                var data3 = [];
-                var data4 = [];
-
-                for (var i = 0; i < 10; i++) {
-                    xAxisData.push(i + ' Long label should use ellipsis if width is set');
-                    data0.push(-Math.random().toFixed(2));
-                    data1.push((Math.random() * 5).toFixed(2));
-                    data2.push(-Math.random().toFixed(2));
-                    data3.push((Math.random() + 0.5).toFixed(2));
-
-                    if (i === 9) {
-                        data4.push(0.01);
-                    }
-                    else {
-                        data4.push((Math.random() + 0.3).toFixed(2));
-                    }
-                }
-
-                var itemStyle = {
-                    normal: {
-                        barBorderRadius: 5,
-                        label: {
-                            show: true,
-                            position: 'outside'
-                        }
-                    },
-                    emphasis: {
-                        label: {
-                            position: 'outside'
-                        },
-                        barBorderColor: '#fff',
-                        barBorderWidth: 1,
-                        shadowBlur: 10,
-                        shadowOffsetX: 0,
-                        shadowOffsetY: 0,
-                        shadowColor: 'rgba(0,0,0,0.5)'
-                    }
-                };
-                var label = {
-                    normal: {
-                        position: 'insideLeft'
-                    },
-                    emphasis: {
-                        position: 'insideLeft'
-                    }
-                };
-
-                chart.setOption({
-                    backgroundColor: '#eee',
-                    title: {
-                        text: 'Error and Exception that user met',
-                        padding: 20
-                    },
-                    legend: {
-                        inactiveColor: '#abc',
-                        borderWidth: 1,
-                        data: ['bar0', {
-                            name: 'bar'
-                        }, 'bar2', '\n', 'bar3', 'bar4'],
-                        align: 'left',
-                        tooltip: {
-                            show: true
-                        }
-                    },
-                    tooltip: {},
-                    yAxis: {
-                        data: xAxisData,
-                        name: '横轴',
-                        silent: false,
-                        axisTick: {
-                            alignWithLabel: true
-                        },
-                        axisLine: {
-                            onZero: true
-                        },
-                        splitLine: {
-                            show: true
-                        },
-                        splitArea: {
-                            show: true
-                        },
-                        axisLabel: {
-                            width: 100,
-                            overflow: 'truncate',
-                        }
-                    },
-                    xAxis: {
-                        inverse: true,
-                        axisTick: {
-                            show: false
-                        },
-                        splitArea: {
-                            show: false
-                        }
-                    },
-                    series: [{
-                        name: 'bar0',
-                        type: 'bar',
-                        stack: 'one',
-                        itemStyle: itemStyle,
-                        label: label,
-                        data: data0
-                    }, {
-                        name: 'bar',
-                        type: 'bar',
-                        stack: 'one',
-                        itemStyle: itemStyle,
-                        label: label,
-                        data: data1
-                    }, {
-                        name: 'bar2',
-                        type: 'bar',
-                        stack: 'one',
-                        itemStyle: itemStyle,
-                        label: label,
-                        data: data2
-                    }, {
-                        name: 'bar3',
-                        type: 'bar',
-                        stack: 'two',
-                        itemStyle: itemStyle,
-                        label: label,
-                        data: data3
-                    }, {
-                        name: 'bar4',
-                        type: 'bar',
-                        stack: 'two',
-                        itemStyle: itemStyle,
-                        label: label,
-                        data: data4
-                    }]
-                });
-
-                window.onresize = chart.resize;
+            // 提取不同维度的数据
+            var acceptRateData = mergedData.map(function(item) {
+                return (item.avgTimeInterval/100).toFixed(2);  // 时间间隔数据
             });
-        </script>
-    </body>
+
+            var upvotesData = mergedData.map(function(item) {
+                return (item.avgReputation/100).toFixed(2);  // 声誉数据
+            });
+
+            var errorData = mergedData.map(function(item) {
+                return (item.avgTextLength/10).toFixed(2);  // 文本长度数据
+            });
+
+            var voteNum = mergedData.map(function(item) {
+                return item.avgVoteNum.toFixed(2);
+            });
+
+            var itemStyle = {
+                normal: {
+                    barBorderRadius: 5,
+                    label: {
+                        show: true,
+                        position: 'outside'
+                    }
+                },
+                emphasis: {
+                    label: {
+                        position: 'outside'
+                    },
+                    barBorderColor: '#fff',
+                    barBorderWidth: 1,
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowOffsetY: 0,
+                    shadowColor: 'rgba(0,0,0,0.5)'
+                }
+            };
+
+            var label = {
+                normal: {
+                    position: 'insideLeft'
+                },
+                emphasis: {
+                    position: 'insideLeft'
+                }
+            };
+
+            // 设置 ECharts 配置
+            chart.setOption({
+                backgroundColor: '#eee',
+                title: {
+                    text: '答案质量多维度分析',
+                    subtext: '时间、用户声誉和答案长度对答案质量的影响',
+                    padding: 20
+                },
+                legend: {
+                    inactiveColor: '#abc',
+                    borderWidth: 1,
+                    data: ['时间间隔(*100)天', '声誉等级(*100)', '文本长度(*10)','Vote Result'],
+                    align: 'left',
+                    tooltip: {
+                        show: true
+                    }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                yAxis: {
+                    data: xAxisData,
+                    name: '分析维度',
+                    silent: false,
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    axisLine: {
+                        onZero: true
+                    },
+                    splitLine: {
+                        show: true
+                    },
+                    splitArea: {
+                        show: true
+                    },
+                    axisLabel: {
+                        width: 150,
+                        overflow: 'truncate',
+                    }
+                },
+                xAxis: {
+                    inverse: true,
+                    axisTick: {
+                        show: false
+                    },
+                    splitArea: {
+                        show: false
+                    }
+                },
+                series: [
+                    {
+                        name: '时间间隔(*100)天',
+                        type: 'bar',
+                        stack: 'one',
+                        itemStyle: itemStyle,
+                        label: label,
+                        data: acceptRateData
+                    },
+                    {
+                        name: '声誉等级(*100)',
+                        type: 'bar',
+                        stack: 'one',
+                        itemStyle: itemStyle,
+                        label: label,
+                        data: upvotesData
+                    },
+                    {
+                        name: '文本长度(*10)',
+                        type: 'bar',
+                        stack: 'two',
+                        itemStyle: itemStyle,
+                        label: label,
+                        data: errorData
+                    },
+                    {
+                        name: 'Vote Result',
+                        type: 'bar',
+                        stack: 'two',
+                        itemStyle: itemStyle,
+                        label: label,
+                        data: voteNum
+                    }]
+            });
+
+            window.onresize = chart.resize;
+        })
+        .catch(error => {
+            console.error('获取数据失败:', error);
+        });
+
+</script>
+</body>
 </html>
