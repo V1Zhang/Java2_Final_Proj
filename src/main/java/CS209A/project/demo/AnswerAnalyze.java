@@ -1,25 +1,35 @@
 package CS209A.project.demo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.*;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.*;
 
+@SpringBootApplication
 public class AnswerAnalyze {
+    public static void main(String[] args) {
+        SpringApplication.run(AnswerAnalyze.class, args);
+    }
+}
+
+@RestController
+class AnswerController {
+
     private static final String URL = "jdbc:postgresql://localhost:5432/postgres";
     private static final String USER = "java2";
     private static final String PASSWORD = "Java2";
 
-    public static void main(String[] args) {
+    @CrossOrigin(origins = "http://localhost:63342")
+    @GetMapping("/fetchAnswer")
+    public List<Map<String, Object>> getData() {
+        List<Map<String, Object>> resultList = new ArrayList<>();
         try {
-            // 1. 建立数据库连接
-            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
 
-            // 2. 执行查询
+            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
             String query = "SELECT\n" +
                     "                             a.answer_id,\n" +
                     "                             LENGTH(a.answer_text) AS text_length,\n" +
@@ -31,24 +41,24 @@ public class AnswerAnalyze {
                     "                               JOIN stackoverflow_questions q ON a.question_id = q.links\n" +
                     "                      WHERE EXTRACT(EPOCH FROM (a.answer_date - TO_TIMESTAMP(q.date, 'Mon DD, YYYY at HH24:MI'))) /\n" +
                     "                            (24 * 3600) > 0 and answer_text != '';";
-
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
 
             // 3. 数据分类处理
             Map<String, List<DataPoint>> categorizedData = categorizeData(rs);
 
-            // 4. 导出JSON
-            exportToJson(categorizedData);
+            // 4. 将分类数据转换为List
+            resultList = convertCategoriesToList(categorizedData);
 
             // 5. 关闭资源
             rs.close();
             stmt.close();
             conn.close();
 
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
+        return resultList;
     }
 
     static class DataPoint {
@@ -141,93 +151,40 @@ public class AnswerAnalyze {
         return categories;
     }
 
-    // JSON导出方法
-    private static void exportToJson(Map<String, List<DataPoint>> categorizedData) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ObjectNode jsonOutput = objectMapper.createObjectNode();
+    // 将分类数据转换为 List
+    private static List<Map<String, Object>> convertCategoriesToList(Map<String, List<DataPoint>> categorizedData) {
+        List<Map<String, Object>> resultList = new ArrayList<>();
 
         // 处理文本长度类别
-        ArrayNode textLengthArray = processCategory(
-                categorizedData.get("textLengthCategoriesShort"),
-                "textLength",
-                "短答案"
-        );
-        textLengthArray.addAll(processCategory(
-                categorizedData.get("textLengthCategoriesMedium"),
-                "textLength",
-                "中等答案"
-        ));
-        textLengthArray.addAll(processCategory(
-                categorizedData.get("textLengthCategoriesLong"),
-                "textLength",
-                "长答案"
-        ));
-        jsonOutput.set("textLengthCategories", textLengthArray);
+        addCategoryToList(resultList, categorizedData.get("textLengthCategoriesShort"), "文本长度-短");
+        addCategoryToList(resultList, categorizedData.get("textLengthCategoriesMedium"), "文本长度-中等");
+        addCategoryToList(resultList, categorizedData.get("textLengthCategoriesLong"), "文本长度-长");
 
         // 处理声誉类别
-        ArrayNode reputationArray = processCategory(
-                categorizedData.get("reputationCategoriesLow"),
-                "reputation",
-                "低声誉"
-        );
-        reputationArray.addAll(processCategory(
-                categorizedData.get("reputationCategoriesMedium"),
-                "reputation",
-                "中声誉"
-        ));
-        reputationArray.addAll(processCategory(
-                categorizedData.get("reputationCategoriesHigh"),
-                "reputation",
-                "高声誉"
-        ));
-        jsonOutput.set("reputationCategories", reputationArray);
+        addCategoryToList(resultList, categorizedData.get("reputationCategoriesLow"), "声誉-低");
+        addCategoryToList(resultList, categorizedData.get("reputationCategoriesMedium"), "声誉-中");
+        addCategoryToList(resultList, categorizedData.get("reputationCategoriesHigh"), "声誉-高");
 
         // 处理时间类别
-        ArrayNode timeArray = processCategory(
-                categorizedData.get("timeCategoriesShort"),
-                "timeInterval",
-                "1年内"
-        );
-        timeArray.addAll(processCategory(
-                categorizedData.get("timeCategoriesMedium"),
-                "timeInterval",
-                "1-5年"
-        ));
-        timeArray.addAll(processCategory(
-                categorizedData.get("timeCategoriesLong"),
-                "timeInterval",
-                "5-10年"
-        ));
-        timeArray.addAll(processCategory(
-                categorizedData.get("timeCategoriesVeryLong"),
-                "timeInterval",
-                "10年以上"
-        ));
-        jsonOutput.set("timeCategories", timeArray);
+        addCategoryToList(resultList, categorizedData.get("timeCategoriesShort"), "时间-1年内");
+        addCategoryToList(resultList, categorizedData.get("timeCategoriesMedium"), "时间-1-5年");
+        addCategoryToList(resultList, categorizedData.get("timeCategoriesLong"), "时间-5-10年");
+        addCategoryToList(resultList, categorizedData.get("timeCategoriesVeryLong"), "时间-10年以上");
 
-        // 写入JSON文件
-        try (FileWriter file = new FileWriter("answer_analysis7.json")) {
-            file.write(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonOutput));
-            System.out.println("JSON文件已成功生成");
-        }
+        return resultList;
     }
 
-    // 处理每个类别的统计
-    private static ArrayNode processCategory(List<DataPoint> dataPoints, String categoryName, String categoryLabel) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayNode resultArray = objectMapper.createArrayNode();
-
-        ObjectNode categoryData = objectMapper.createObjectNode();
-        categoryData.put("category", categoryLabel);
+    // 向结果列表中添加分类数据
+    private static void addCategoryToList(List<Map<String, Object>> resultList, List<DataPoint> dataPoints, String category) {
+        Map<String, Object> categoryData = new HashMap<>();
+        categoryData.put("category", category);
         categoryData.put("count", dataPoints.size());
         categoryData.put("avgTextLength", calculateAverageTextLength(dataPoints));
         categoryData.put("avgReputation", calculateAverageReputation(dataPoints));
         categoryData.put("avgTimeInterval", calculateAverageTimeInterval(dataPoints));
         categoryData.put("avgVoteNum", calculateAverageVoteNum(dataPoints));
 
-        resultArray.add(categoryData);
-
-        return resultArray;
+        resultList.add(categoryData);
     }
 
     private static double calculateAverageTextLength(List<DataPoint> dataPoints) {

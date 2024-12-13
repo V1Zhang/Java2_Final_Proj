@@ -29,7 +29,7 @@
             left: 0;
             width: 100%;
             height: 4600px;
-            z-index: -1;  /* 确保它在内容层下面 */
+            z-index: -1;
         }
 
         #input-container {
@@ -50,9 +50,8 @@
             height: 400px;
         }
 
-        /* 全宽的横向柱状图样式 */
         .chart-full-width {
-            flex-basis: 100%; /* 占据整行 */
+            flex-basis: 100%;
             height: 4000px;
             border: 1px solid #ddd;
             box-sizing: border-box;
@@ -240,8 +239,8 @@
                         const colors = [
                             '#ff97b9', '#e19cf1', '#abb4f1', '#93c4f1',
                             '#ffd195', '#ffa387', '#c2a090', '#93c4f1',
-                            '#009688', '#4CAF50', '#FFEB3B',
-                            '#00BCD4', '#8BC34A', '#CDDC39'
+                            '#009688', '#5dd361', '#c2fc67',
+                            '#00BCD4', '#8BC34A', '#e1fad8'
                         ];
                         return colors[params.dataIndex % colors.length];
                     }

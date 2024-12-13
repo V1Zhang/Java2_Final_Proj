@@ -21,7 +21,11 @@ public class ErrorExceCounter {
 
     public static void main(String[] args) {
         SpringApplication.run(ErrorExceCounter.class, args);
+        SpringApplication.run(TagCounter.class, args);
+        SpringApplication.run(UserTagCounter.class, args);
     }
+
+
 }
 
 @RestController

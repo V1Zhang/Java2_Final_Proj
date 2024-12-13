@@ -7,33 +7,125 @@
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
+        #infoBox {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 10px;
+            display: none;
+            font-family: Arial, sans-serif;
+            border-radius: 10px;
+        }
+        #infoBox2 {
+            position: fixed;
+            top: 70px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            width: 200px;
+            max-width: 200px;
+            z-index: 10;
+            border-radius: 10px;
+        }
+
+        .color-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .color-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        span {
+            font-size: 12px;
+        }
+
     </style>
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+<div id="infoBox">X: <span id="infoX"></span> | Y: <span id="infoY"></span> | Z: <span id="infoZ"></span></div>
+<div id="infoBox2">
+    <div class="color-info">
+        <div class="color-circle" style="background-color: #009688;"></div>
+        <span>高质量</span>
+    </div>
+    <div class="color-info">
+        <div class="color-circle" style="background-color: #5dd361;"></div>
+        <span>中高质量</span>
+    </div>
+    <div class="color-info">
+        <div class="color-circle" style="background-color: #c2fc67;"></div>
+        <span>中质量</span>
+    </div>
+    <div class="color-info">
+        <div class="color-circle" style="background-color: #cfe575;"></div>
+        <span>低质量</span>
+    </div>
+</div>
 <script>
     // 设置 Three.js 场景
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe1fad8, 1);  // 设置背景颜色为白色
     document.body.appendChild(renderer.domElement);
 
     // 创建坐标轴辅助工具
-    const axesHelper = new THREE.AxesHelper(60);  // 坐标轴长度
+    const axesHelper = new THREE.AxesHelper(100);  // 坐标轴长度
     scene.add(axesHelper);
 
     // 为不同的 voteNum 设置颜色
     const colorMap = {
-        '1': 0xff0000,  // Red
-        '2': 0x00ff00,   // Green
-        '3': 0x0000ff,   // Blue
-        '4': 0xffff00, // Yellow
+        '1': 0x009688,
+        '2': 0x5dd361,
+        '3': 0xc2fc67,
+        '4': 0xcfe575,
     };
 
+    // 创建坐标轴标签函数
+    function createLabel(text, position) {
+        const loader = new THREE.FontLoader();
+        loader.load('../dist/helvetiker_regular.typeface.json', function(font) {
+            const textGeometry = new THREE.TextGeometry(text, {
+                font: font,
+                size: 2,
+                height: 0.5
+            });
+
+            const textMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+
+            textMesh.position.set(position.x, position.y, position.z);
+            scene.add(textMesh);
+        });
+    }
+
+    // 设置坐标轴标签
+    createLabel('Text Length', new THREE.Vector3(100, 0, 0)); // X轴
+    createLabel('Owner Reputation', new THREE.Vector3(0, 100, 0)); // Y轴
+    createLabel('Days Difference', new THREE.Vector3(0, 0, 200)); // Z轴
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(); // 鼠标位置
+
+    // 存储所有的球体
+    let spheres = [];
+
     // 使用 fetch 获取 JSON 数据
-    fetch('point3.json')
+    fetch(`http://localhost:9091/fetchPoint`)
         .then(response => response.json())
         .then(data => {
             // 添加点
@@ -43,8 +135,13 @@
                     const geometry = new THREE.SphereGeometry(1.2, 32, 32); // 缩小球体的半径
                     const material = new THREE.MeshBasicMaterial({ color: color });
                     const sphere = new THREE.Mesh(geometry, material);
-                    sphere.position.set(point.textLength/10, point.ownerReputation/10, point.daysDiff/10);
+                    sphere.position.set(point.textLength / 50, point.ownerReputation / 10000, point.daysDiff / 30);
+                    sphere.userData = {
+                        point: point,
+                        id: `${point.textLength}, ${point.ownerReputation}, ${point.daysDiff}`
+                    };
                     scene.add(sphere);
+                    spheres.push(sphere); // 将球体存入数组
                 });
             });
 
@@ -57,7 +154,7 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
     // 设置相机位置
-    camera.position.z = 10;
+    camera.position.z = 15;
 
     // 渲染场景
     function animate() {
@@ -72,6 +169,33 @@
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
     });
+
+    // 监听鼠标移动事件
+    window.addEventListener('mousemove', (event) => {
+        // 计算鼠标位置
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // 计算鼠标与物体的交点
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(spheres);
+
+        // 如果有交点
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            const point = object.userData.point;
+
+            // 更新信息框
+            document.getElementById('infoBox').style.display = 'block';
+            // 显示标签与对应的值
+            document.getElementById('infoX').innerText = `Text Length: ${point.textLength}`;
+            document.getElementById('infoY').innerText = `Owner Reputation: ${point.ownerReputation}`;
+            document.getElementById('infoZ').innerText = `Days Difference: ${point.daysDiff}`;
+        } else {
+            document.getElementById('infoBox').style.display = 'none';
+        }
+    });
+
 </script>
 </body>
 </html>

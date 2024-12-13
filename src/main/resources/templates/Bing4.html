@@ -21,7 +21,7 @@
     var chart = echarts.init(document.getElementById('main'));
 
     // 使用 fetch 请求外部的 JSON 数据
-    fetch('answer_analysis7.json')  // 替换为实际 JSON 文件的 URL 或路径
+    fetch(`http://localhost:9091/fetchAnswer`)
         .then(response => response.json())  // 解析 JSON 数据
         .then(jsonData => {
             // 获取并处理 JSON 数据
@@ -41,24 +41,24 @@
             ];
 
             const mergedData = [
-                // textLengthCategories
-                ...jsonData.textLengthCategories.map(item => ({
+                // 文本长度分类数据
+                ...jsonData.filter(item => item.category.includes('文本长度')).map(item => ({
                     category: item.category,
                     avgTextLength: item.avgTextLength,
                     avgReputation: item.avgReputation,
                     avgTimeInterval: item.avgTimeInterval,
                     avgVoteNum: item.avgVoteNum
                 })),
-                // reputationCategories
-                ...jsonData.reputationCategories.map(item => ({
+                // 声誉分类数据
+                ...jsonData.filter(item => item.category.includes('声誉')).map(item => ({
                     category: item.category,
                     avgTextLength: item.avgTextLength,
                     avgReputation: item.avgReputation,
                     avgTimeInterval: item.avgTimeInterval,
                     avgVoteNum: item.avgVoteNum
                 })),
-                // timeCategories
-                ...jsonData.timeCategories.map(item => ({
+                // 时间间隔分类数据
+                ...jsonData.filter(item => item.category.includes('时间')).map(item => ({
                     category: item.category,
                     avgTextLength: item.avgTextLength,
                     avgReputation: item.avgReputation,
